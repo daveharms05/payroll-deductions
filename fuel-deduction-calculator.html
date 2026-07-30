@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="apple-touch-icon" href="IMG_2799.png">
 <title>Payroll Deduction Calculator</title>
 <style>
@@ -150,11 +153,11 @@
       <div class="row">
         <div class="field">
           <label for="f-hoursWorked">Hours</label>
-          <input type="number" id="f-hoursWorked" value="82" min="0" autocomplete="off">
+          <input type="number" id="f-hoursWorked" value="" min="0" autocomplete="off">
         </div>
         <div class="field">
           <label for="f-minutesWorked">Minutes</label>
-          <input type="number" id="f-minutesWorked" value="30" min="0" max="59" autocomplete="off">
+          <input type="number" id="f-minutesWorked" value="" min="0" max="59" autocomplete="off">
         </div>
       </div>
     </fieldset>
@@ -164,11 +167,11 @@
       <div class="row">
         <div class="field">
           <label for="f-litres">Litres</label>
-          <input type="number" id="f-litres" value="50" min="0" step="0.01" autocomplete="off">
+          <input type="number" id="f-litres" value="" min="0" step="0.01" autocomplete="off">
         </div>
         <div class="field">
           <label for="f-pricePerLitre">$ / Litre</label>
-          <input type="number" id="f-pricePerLitre" value="1.50" min="0" step="0.01" autocomplete="off">
+          <input type="number" id="f-pricePerLitre" value="" min="0" step="0.01" autocomplete="off">
         </div>
       </div>
     </fieldset>
@@ -177,7 +180,7 @@
       <legend>Pay Rate</legend>
       <div class="field">
         <label for="f-hourlyRate">$ / Hour</label>
-        <input type="number" id="f-hourlyRate" value="30.00" min="0" step="0.01" autocomplete="off">
+        <input type="number" id="f-hourlyRate" value="" min="0" step="0.01" autocomplete="off">
       </div>
     </fieldset>
 
@@ -210,11 +213,11 @@
       <div class="row">
         <div class="field">
           <label for="p-hoursWorked">Hours</label>
-          <input type="number" id="p-hoursWorked" value="82" min="0" autocomplete="off">
+          <input type="number" id="p-hoursWorked" value="" min="0" autocomplete="off">
         </div>
         <div class="field">
           <label for="p-minutesWorked">Minutes</label>
-          <input type="number" id="p-minutesWorked" value="30" min="0" max="59" autocomplete="off">
+          <input type="number" id="p-minutesWorked" value="" min="0" max="59" autocomplete="off">
         </div>
       </div>
     </fieldset>
@@ -223,7 +226,7 @@
       <legend>Parts Purchase</legend>
       <div class="field">
         <label for="p-amount">Purchase Amount ($)</label>
-        <input type="number" id="p-amount" value="0" min="0" step="0.01" autocomplete="off">
+        <input type="number" id="p-amount" value="" min="0" step="0.01" autocomplete="off">
       </div>
     </fieldset>
 
@@ -231,7 +234,7 @@
       <legend>Pay Rate</legend>
       <div class="field">
         <label for="p-hourlyRate">$ / Hour</label>
-        <input type="number" id="p-hourlyRate" value="30.00" min="0" step="0.01" autocomplete="off">
+        <input type="number" id="p-hourlyRate" value="" min="0" step="0.01" autocomplete="off">
       </div>
     </fieldset>
 
@@ -264,11 +267,11 @@
       <div class="row">
         <div class="field">
           <label for="c-hours">Hours</label>
-          <input type="number" id="c-hours" value="83" min="0" autocomplete="off">
+          <input type="number" id="c-hours" value="" min="0" autocomplete="off">
         </div>
         <div class="field">
           <label for="c-minutes">Minutes</label>
-          <input type="number" id="c-minutes" value="33" min="0" max="59" autocomplete="off">
+          <input type="number" id="c-minutes" value="" min="0" max="59" autocomplete="off">
         </div>
       </div>
     </fieldset>
@@ -398,17 +401,17 @@
   calcParts();
   calcConvert();
 
-  // ---------- FORCE RESET ON EVERY OPEN ----------
-  // iOS Safari (especially as a Home Screen app) sometimes restores the page
-  // from its memory cache (bfcache) instead of loading it fresh, which makes
-  // old typed values reappear. This forces every field back to its default
-  // any time the page is shown, including when restored from bfcache.
+  // ---------- FORCE BLANK FIELDS ON EVERY OPEN ----------
+  // iOS Home Screen apps (and browser tabs left open) often resume from
+  // memory instead of loading fresh, which is why old numbers were
+  // sticking around. A true reload guarantees a completely blank start
+  // every time, matching what the HTML defaults specify (empty fields).
   const defaults = {
-    "f-hoursWorked": "82", "f-minutesWorked": "30",
-    "f-litres": "50", "f-pricePerLitre": "1.50", "f-hourlyRate": "30.00",
-    "p-hoursWorked": "82", "p-minutesWorked": "30",
-    "p-amount": "0", "p-hourlyRate": "30.00",
-    "c-hours": "83", "c-minutes": "33"
+    "f-hoursWorked": "", "f-minutesWorked": "",
+    "f-litres": "", "f-pricePerLitre": "", "f-hourlyRate": "",
+    "p-hoursWorked": "", "p-minutesWorked": "",
+    "p-amount": "", "p-hourlyRate": "",
+    "c-hours": "", "c-minutes": ""
   };
 
   function resetAllFields() {
@@ -421,16 +424,23 @@
     calcConvert();
   }
 
-  window.addEventListener("pageshow", resetAllFields);
-
-  // iOS Home Screen apps often just resume from the background instead of
-  // reloading the page, so pageshow alone may not fire. Catch those cases too.
+  // Force a hard reload any time the page/app is resumed rather than
+  // relying on the browser to fire pageshow/visibilitychange reliably.
+  let wasHidden = false;
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
+    if (document.visibilityState === "hidden") {
+      wasHidden = true;
+    } else if (document.visibilityState === "visible" && wasHidden) {
+      window.location.reload();
+    }
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      window.location.reload();
+    } else {
       resetAllFields();
     }
   });
-  window.addEventListener("focus", resetAllFields);
 </script>
 
 </body>
