@@ -422,6 +422,15 @@
   }
 
   window.addEventListener("pageshow", resetAllFields);
+
+  // iOS Home Screen apps often just resume from the background instead of
+  // reloading the page, so pageshow alone may not fire. Catch those cases too.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      resetAllFields();
+    }
+  });
+  window.addEventListener("focus", resetAllFields);
 </script>
 
 </body>
