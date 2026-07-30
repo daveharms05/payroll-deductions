@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Payroll Deduction Calculator</title>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --border: #d9d9de;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --accent: #0071e3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 16px 0;
+  }
+
+  .tabs {
+    display: flex;
+    background: #eeeef0;
+    border-radius: 9px;
+    padding: 3px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 7px 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    border-radius: 7px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab.active {
+    background: #ffffff;
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 18px 0;
+  }
+  legend {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+  .field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  input {
+    font-size: 15px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fafafa;
+    color: var(--text);
+    width: 100%;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 18px 0;
+  }
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+  .result-row.main {
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .result-row span:last-child {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Payroll Deduction Calculator</h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="fuel">Fuel</div>
+    <div class="tab" data-tab="parts">Parts</div>
+    <div class="tab" data-tab="convert">Convert</div>
+  </div>
+
+  <!-- FUEL PANEL -->
+  <div class="panel active" id="panel-fuel">
+    <fieldset>
+      <legend>Time Sheet</legend>
+      <div class="row">
+        <div class="field">
+          <label for="f-hoursWorked">Hours</label>
+          <input type="number" id="f-hoursWorked" value="82" min="0">
+        </div>
+        <div class="field">
+          <label for="f-minutesWorked">Minutes</label>
+          <input type="number" id="f-minutesWorked" value="30" min="0" max="59">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Fuel Purchase</legend>
+      <div class="row">
+        <div class="field">
+          <label for="f-litres">Litres</label>
+          <input type="number" id="f-litres" value="50" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label for="f-pricePerLitre">$ / Litre</label>
+          <input type="number" id="f-pricePerLitre" value="1.50" min="0" step="0.01">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pay Rate</legend>
+      <div class="field">
+        <label for="f-hourlyRate">$ / Hour</label>
+        <input type="number" id="f-hourlyRate" value="30.00" min="0" step="0.01">
+      </div>
+    </fieldset>
+
+    <hr>
+
+    <div class="results">
+      <div class="result-row">
+        <span>Fuel cost:</span>
+        <span id="f-cost">$0.00</span>
+      </div>
+      <div class="result-row">
+        <span>Time to deduct:</span>
+        <span id="f-deductionTime">0h 0m</span>
+      </div>
+      <div class="result-row main">
+        <span>Adjusted time sheet:</span>
+        <span id="f-adjustedTime">0h 0m</span>
+      </div>
+      <div class="result-row">
+        <span>Adjusted (decimal):</span>
+        <span id="f-adjustedDecimal">0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTS PANEL -->
+  <div class="panel" id="panel-parts">
+    <fieldset>
+      <legend>Time Sheet</legend>
+      <div class="row">
+        <div class="field">
+          <label for="p-hoursWorked">Hours</label>
+          <input type="number" id="p-hoursWorked" value="82" min="0">
+        </div>
+        <div class="field">
+          <label for="p-minutesWorked">Minutes</label>
+          <input type="number" id="p-minutesWorked" value="30" min="0" max="59">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Parts Purchase</legend>
+      <div class="field">
+        <label for="p-amount">Purchase Amount ($)</label>
+        <input type="number" id="p-amount" value="0" min="0" step="0.01">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pay Rate</legend>
+      <div class="field">
+        <label for="p-hourlyRate">$ / Hour</label>
+        <input type="number" id="p-hourlyRate" value="30.00" min="0" step="0.01">
+      </div>
+    </fieldset>
+
+    <hr>
+
+    <div class="results">
+      <div class="result-row">
+        <span>Parts cost:</span>
+        <span id="p-cost">$0.00</span>
+      </div>
+      <div class="result-row">
+        <span>Time to deduct:</span>
+        <span id="p-deductionTime">0h 0m</span>
+      </div>
+      <div class="result-row main">
+        <span>Adjusted time sheet:</span>
+        <span id="p-adjustedTime">0h 0m</span>
+      </div>
+      <div class="result-row">
+        <span>Adjusted (decimal):</span>
+        <span id="p-adjustedDecimal">0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERT PANEL -->
+  <div class="panel" id="panel-convert">
+    <fieldset>
+      <legend>Hours &amp; Minutes</legend>
+      <div class="row">
+        <div class="field">
+          <label for="c-hours">Hours</label>
+          <input type="number" id="c-hours" value="83" min="0">
+        </div>
+        <div class="field">
+          <label for="c-minutes">Minutes</label>
+          <input type="number" id="c-minutes" value="33" min="0" max="59">
+        </div>
+      </div>
+    </fieldset>
+
+    <hr>
+
+    <div class="results">
+      <div class="result-row main">
+        <span>Decimal hours:</span>
+        <span id="c-decimal">0.00</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function num(el) {
+    const v = parseFloat(el.value);
+    return isNaN(v) ? 0 : v;
+  }
+
+  function timeParts(totalMinutes) {
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}h ${m}m`;
+  }
+
+  function decimalHours(totalMinutes) {
+    return (totalMinutes / 60).toFixed(2);
+  }
+
+  // ---------- FUEL ----------
+  const fIds = ["f-hoursWorked", "f-minutesWorked", "f-litres", "f-pricePerLitre", "f-hourlyRate"];
+  const fEls = {};
+  fIds.forEach(id => {
+    fEls[id] = document.getElementById(id);
+    fEls[id].addEventListener("input", calcFuel);
+  });
+  const fCostEl = document.getElementById("f-cost");
+  const fDeductEl = document.getElementById("f-deductionTime");
+  const fAdjustEl = document.getElementById("f-adjustedTime");
+  const fAdjustDecEl = document.getElementById("f-adjustedDecimal");
+
+  function calcFuel() {
+    const hoursWorked = num(fEls["f-hoursWorked"]);
+    const minutesWorked = num(fEls["f-minutesWorked"]);
+    const litres = num(fEls["f-litres"]);
+    const pricePerLitre = num(fEls["f-pricePerLitre"]);
+    const hourlyRate = num(fEls["f-hourlyRate"]);
+
+    const cost = litres * pricePerLitre;
+    const deductionHoursDecimal = hourlyRate > 0 ? cost / hourlyRate : 0;
+    const deductionTotalMinutes = Math.round(deductionHoursDecimal * 60);
+
+    const workedTotalMinutes = Math.round(hoursWorked * 60 + minutesWorked);
+    const adjustedTotalMinutes = Math.max(0, workedTotalMinutes - deductionTotalMinutes);
+
+    fCostEl.textContent = `$${cost.toFixed(2)}`;
+    fDeductEl.textContent = timeParts(deductionTotalMinutes);
+    fAdjustEl.textContent = timeParts(adjustedTotalMinutes);
+    fAdjustDecEl.textContent = decimalHours(adjustedTotalMinutes);
+  }
+
+  // ---------- PARTS ----------
+  const pIds = ["p-hoursWorked", "p-minutesWorked", "p-amount", "p-hourlyRate"];
+  const pEls = {};
+  pIds.forEach(id => {
+    pEls[id] = document.getElementById(id);
+    pEls[id].addEventListener("input", calcParts);
+  });
+  const pCostEl = document.getElementById("p-cost");
+  const pDeductEl = document.getElementById("p-deductionTime");
+  const pAdjustEl = document.getElementById("p-adjustedTime");
+  const pAdjustDecEl = document.getElementById("p-adjustedDecimal");
+
+  function calcParts() {
+    const hoursWorked = num(pEls["p-hoursWorked"]);
+    const minutesWorked = num(pEls["p-minutesWorked"]);
+    const amount = num(pEls["p-amount"]);
+    const hourlyRate = num(pEls["p-hourlyRate"]);
+
+    const deductionHoursDecimal = hourlyRate > 0 ? amount / hourlyRate : 0;
+    const deductionTotalMinutes = Math.round(deductionHoursDecimal * 60);
+
+    const workedTotalMinutes = Math.round(hoursWorked * 60 + minutesWorked);
+    const adjustedTotalMinutes = Math.max(0, workedTotalMinutes - deductionTotalMinutes);
+
+    pCostEl.textContent = `$${amount.toFixed(2)}`;
+    pDeductEl.textContent = timeParts(deductionTotalMinutes);
+    pAdjustEl.textContent = timeParts(adjustedTotalMinutes);
+    pAdjustDecEl.textContent = decimalHours(adjustedTotalMinutes);
+  }
+
+  // ---------- CONVERT ----------
+  const cHoursEl = document.getElementById("c-hours");
+  const cMinutesEl = document.getElementById("c-minutes");
+  const cDecimalEl = document.getElementById("c-decimal");
+
+  function calcConvert() {
+    const hours = num(cHoursEl);
+    const minutes = num(cMinutesEl);
+    const totalMinutes = Math.round(hours * 60 + minutes);
+    cDecimalEl.textContent = decimalHours(totalMinutes);
+  }
+  cHoursEl.addEventListener("input", calcConvert);
+  cMinutesEl.addEventListener("input", calcConvert);
+
+  // ---------- TABS ----------
+  const tabs = document.querySelectorAll(".tab");
+  const panels = {
+    fuel: document.getElementById("panel-fuel"),
+    parts: document.getElementById("panel-parts"),
+    convert: document.getElementById("panel-convert")
+  };
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      Object.values(panels).forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      panels[tab.dataset.tab].classList.add("active");
+    });
+  });
+
+  // Initial calculation
+  calcFuel();
+  calcParts();
+  calcConvert();
+</script>
+
+</body>
+</html>
